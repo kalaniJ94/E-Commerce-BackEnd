@@ -7,10 +7,13 @@ router.get('/', async (req, res) => {
   // find all tags
   // be sure to include its associated Product data
   try {
-    const tagData = await Tag.findAll(
-      // include: [{Product, through: ProductTag, as: 'Product_Tag'}]
-    );
-    res.status(200).json(tagData);
+    const tagData = await Tag.findAll({ 
+      include: [
+        { model: Product, 
+          through: ProductTag, 
+        },
+      ] })
+      res.status(200).json(tagData)
   } catch (err) {
     res.status(400).json(err);
   }
@@ -20,11 +23,16 @@ router.get('/:id', async (req, res) => {
   // find a single tag by its `id`
   // be sure to include its associated Product data
   try {
-    const tagData = await new Tag.findByPk(req.params.id, {
-      include: [{Product, through: ProductTag, as: 'Product_Tag'}]
+    const tagData = await Tag.findOne( {
+      where: {id: req.params.id},
+      include: [
+        {
+          model: Product,
+          through: ProductTag,
+        }]
     })
-    if(!tagData){
-      res.status(404).json({ message: 'No tag found with that ID'});
+    if (!tagData) {
+      res.status(404).json({ message: 'No tag found with that ID' });
       return;
     }
     res.status(200).json(tagData);
@@ -46,13 +54,13 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   // update a tag's name by its `id` value
   try {
-    const tagUpdated = await Tag.update(req.body,{
+    const tagUpdated = await Tag.update(req.body, {
       where: {
         id: req.params.id
       },
     })
-    if(!tagUpdated){
-      return res.status(404).json({message: 'Tag not found'});
+    if (!tagUpdated) {
+      return res.status(404).json({ message: 'Tag not found' });
     }
     const updatedTagData = await Tag.findByPk(req.params.id);
     return res.json(updatedTagData);
@@ -71,10 +79,11 @@ router.delete('/:id', async (req, res) => {
         id: req.params.id
       }
     });
-    if(!tagData){
-      res.status(404).json({ message: 'No tag with that ID found.'})
+    if (!tagData) {
+      res.status(404).json({ message: 'No tag with that ID found.' })
       return;
     }
+    res.status(200).json(tagData)
   } catch (err) {
     res.status(400).json(err);
   }
